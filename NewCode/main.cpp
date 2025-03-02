@@ -4,12 +4,14 @@
 bool isWhiteTurn = true;
 const int BOARD_WIDTH = 8;
 
-void createBoard (const int, square  (&squares)[BOARD_WIDTH][BOARD_WIDTH]);
-bool validateMove(std::string inputPosition, std::string inputMove, piece movingPiece);
+void createBoard (const int, square squares[BOARD_WIDTH][BOARD_WIDTH]);
+bool validateMove(std::string inputPosition, std::string inputMove, piece & movingPiece);
 int returnFileNum(std::string & squarePos);
 bool movePieceConditional (square squares[BOARD_WIDTH][BOARD_WIDTH], piece & movingPiece, std::string pos, std::string move);
-void movePiece (square (&squares)[BOARD_WIDTH][BOARD_WIDTH], piece & movingPiece, std::string pos, std::string move);
-
+void movePiece (square squares[BOARD_WIDTH][BOARD_WIDTH], piece & movingPiece, std::string pos, std::string move);
+int * convertInput(std::string inputPos, std::string inputMove);
+void updateBoard(const int SIZE, square squaresList[BOARD_WIDTH][BOARD_WIDTH]);
+bool hasEnded(square squaresList[BOARD_WIDTH][BOARD_WIDTH], bool isWhiteTurn);
 
 int main () {
     
@@ -17,6 +19,7 @@ int main () {
     
     std::string inputMove;
     std::string inputPosition;
+    piece movingPiece;
 
     // figure out how to pass squaresList by reference
 
@@ -33,9 +36,12 @@ int main () {
 
     Every turn, we take a validated input in the form [Piece][Rank][File] (Nf3) and move the piece accordingly
     */
+   int count = 0;
+
+   while (hasEnded) {
 
     if (isWhiteTurn) {
-        std::cout << "It is currently whites's move. Please enter the position of the piece you want to move: ";
+    std::cout << "It is currently whites's move. Please enter the position of the piece you want to move: ";
     }
     else {
         std::cout << "It is currently black's move. Please enter the position of the piece you want to move: ";
@@ -45,32 +51,46 @@ int main () {
     std::cout << "Enter where you would like to move it: ";
     std::cin >> inputMove;
 
-    // validate input (length, validateMove command, etc.) after changing from Nf3 to 3 ints 
-    // is it ok to coerce the type to int?
-    // do we need a pointer for the character array?
-
-    piece movingPiece;
+    
 
 
     // use the correct square to find piece for validating move.
 
     if (!(validateMove(inputPosition, inputMove, movingPiece) && movePieceConditional(squaresList, movingPiece, inputPosition, inputMove))) {
-        std::cout << "Not a valid move, please enter a correct move: ";
+        std::cout << "Not a valid move, please enter a correct move - ";
+        //std::cout << "piece is at " << movingPiece.xPos << ", " << movingPiece.yPos;
+        //std::cout << "input is at " << returnFileNum(inputPosition) << ", " << inputPosition[2] - 48 << "to " << returnFileNum(inputMove) << ", " << inputMove[2] - 48;
     }
     else { 
         // Move Piece func and Update board func
-
-        std::cout << "Well done" << std::endl; 
+        movePiece(squaresList, movingPiece, inputPosition, inputMove);
+        //std::cout << "Well done" << std::endl; 
+        updateBoard(BOARD_WIDTH, squaresList);
+        isWhiteTurn = !isWhiteTurn;
+        //std::cout << "piece is at " << movingPiece.xPos << ", " << movingPiece.yPos;
     }
+    count++;
+   }
+    
       
-    // Update Board Function
+    
 
     return 0;
 
    
 }
 
+/*int * convertInput(std::string inputPos) {
+    int fileRank[2];
 
+    fileRank[0] = returnFileNum(inputPos);
+    fileRank[1] = inputPos[2] - 48;
+
+    return fileRank;
+
+
+    //Unused RN
+} */
 
 int returnFileNum(std::string & squarePos) {
     const char characterList[8] = {
@@ -85,7 +105,7 @@ int returnFileNum(std::string & squarePos) {
     return 0;
 }
 
-bool validateMove(std::string inputPosition, std::string inputMove, piece movingPiece) {
+bool validateMove(std::string inputPosition, std::string inputMove, piece & movingPiece) {
 
     // Making sure that the inputs are within the board and the moving piece is the same
 
@@ -101,7 +121,7 @@ bool validateMove(std::string inputPosition, std::string inputMove, piece moving
     movingPiece.type = inputMove[0];
 
     if (newFileNum > 8 || newRankNum > 8 || inputPosition[0] != inputMove[0]) 
-        { return false; }
+        { return false; /* std::cout << "random error"; */}
 
     // For each piece type, validating the movement based on the rules
 
@@ -109,29 +129,29 @@ bool validateMove(std::string inputPosition, std::string inputMove, piece moving
             if ((movingPiece.xPos == newFileNum || movingPiece.yPos == newRankNum) 
             && !(newFileNum == movingPiece.xPos && newRankNum == movingPiece.yPos)) 
             { return true; } 
-        else { return false; } 
+        else { return false; /*std::cout << "rook error"; */} 
     }
 
     if (movingPiece.type == 'N') {
         if ((abs(newFileNum - movingPiece.xPos) == 1 && abs(newRankNum - movingPiece.yPos) == 2) 
             || (abs(newFileNum - movingPiece.xPos) == 2 && abs(newRankNum - movingPiece.yPos) == 1))
-            { return true; }
+            { return true; /* std::cout << "knight error"; */}
     }
 
     if (movingPiece.type == 'B') {
-        if ((newFileNum - movingPiece.xPos == newRankNum - movingPiece.yPos) 
+        if ((abs(newFileNum - movingPiece.xPos) == abs(newRankNum - movingPiece.yPos)) 
             && !(newFileNum == movingPiece.xPos && newRankNum == movingPiece.yPos)) 
             { return true; } 
-        else { return false; }
+        else { return false; /* std::cout << "bishop error"; */}
     }
 
     if (movingPiece.type == 'Q') {
-        if ((newFileNum - movingPiece.xPos == newRankNum - movingPiece.yPos 
+        if ((abs(newFileNum - movingPiece.xPos) == abs(newRankNum - movingPiece.yPos)
             || movingPiece.xPos == newFileNum 
             || movingPiece.yPos == newRankNum) 
             && !(newFileNum == movingPiece.xPos && newRankNum == movingPiece.yPos)) 
             { return true; } 
-        else { return false; }
+        else { return false; /*std::cout << "queen error"; */}
     }
 
     if (movingPiece.type == 'K') {
@@ -140,7 +160,7 @@ bool validateMove(std::string inputPosition, std::string inputMove, piece moving
             && newRankNum <= movingPiece.yPos + 1
             && !(newFileNum == movingPiece.xPos && newRankNum == movingPiece.yPos)) 
             { return true; }
-        else { return false; }
+        else { return false; /*std::cout << "king error"; */}
     }
 
     if (movingPiece.type == 'p') {
@@ -160,13 +180,13 @@ bool validateMove(std::string inputPosition, std::string inputMove, piece moving
         }
         else if (newFileNum == movingPiece.xPos && newRankNum == movingPiece.yPos - 1)
             { return true; }
-        else { return false; }
+        else { return false; /*std::cout << "pawn error";*/ }
     }
     return 0;
 } 
 
 
-void createBoard (const int BOARD_WIDTH, square (&squaresList)[8][8]) {
+void createBoard (const int BOARD_WIDTH, square squaresList[8][8]) {
     // establishes the order of the pieces and the types of pieces on the squares
     const int PIECE_ORDER_ROW_1[8]  = { 0, 1, 2, 3, 4, 2, 1, 0 };
     const char pieceValue[6] = { 'R', 'N', 'B', 'Q', 'K', 'p' };
@@ -224,15 +244,16 @@ bool movePieceConditional (square squares[BOARD_WIDTH][BOARD_WIDTH], piece & mov
     int ogRankNum = inputPos[2] - 48;
     int newRankNum = inputMove[2] - 48;
 
-    // this part gets a little ugly imma be honest -- squaresList does not line up with the conventional grid system even though the xPos and yPos's do
+    // this part gets a little ugly imma be honest -- squaresList does not line up with the conventional grid system even though the xPos and yPos's do 
 
     if (squares[8 - ogRankNum][ogFileNum - 1].pieceOnSquare.type != inputPos[0] || squares[8 - ogRankNum][ogFileNum - 1].pieceOnSquare.isWhite != isWhiteTurn) {
+        //std::cout << "no piece or wrong color" << std::endl;
+        //std::cout << squares[8 - ogRankNum][ogFileNum - 1].pieceOnSquare.type << ", " << inputPos[0] << std::endl;
+        //std::cout << squares[8 - ogRankNum][ogFileNum - 1].pieceOnSquare.isWhite << ". " << isWhiteTurn << std::endl;
         return false;
     }
-    if (squares[8 - newRankNum][newFileNum - 1].pieceOnSquare.isWhite == squares[8 - ogRankNum][ogFileNum - 1].pieceOnSquare.isWhite) {
-        return false;
-    }
-    if (!squares[8 - newRankNum][newFileNum - 1].isFree) {
+    if (squares[8 - newRankNum][newFileNum - 1].pieceOnSquare.isWhite == squares[8 - ogRankNum][ogFileNum - 1].pieceOnSquare.isWhite && squares[8 - newRankNum][newFileNum - 1].isFree == false) {
+        // std::cout << "moving to a square with same color piece";
         return false;
     }
     
@@ -241,15 +262,75 @@ bool movePieceConditional (square squares[BOARD_WIDTH][BOARD_WIDTH], piece & mov
 }
 //test
 
-void movePiece (square (&squares)[BOARD_WIDTH][BOARD_WIDTH], piece & movingPiece, std::string inputPosition, std::string inputMove) {
+void movePiece (square squares[BOARD_WIDTH][BOARD_WIDTH], piece & movingPiece, std::string inputPosition, std::string inputMove) {
     /*
     change movingPiece xpos and ypos to the inputMove rank and file, 
-    free the new square, 
-    and update the old square 
+    free the old square, 
+    and update the new square 
     */
+
+    int ogFileNum = returnFileNum(inputPosition);
+    int newFileNum = returnFileNum(inputMove);
+
+    int ogRankNum = inputPosition[2] - 48;
+    int newRankNum = inputMove[2] - 48;
+
+    movingPiece.xPos = squares[8 - newRankNum][newFileNum - 1].xPos;
+    movingPiece.yPos = squares[8 - newRankNum][newFileNum - 1].yPos;
+
+    // std::cout << "Moved Piece to " << movingPiece.xPos << ", " << movingPiece.yPos;
+
+    squares[8 - ogRankNum][ogFileNum - 1].isFree = true;
+    squares[8 - ogRankNum][ogFileNum - 1].pieceOnSquare.type = ' ';
+
+
+    squares[8 - newRankNum][newFileNum - 1].isFree = false;
+    squares[8 - newRankNum][newFileNum - 1].pieceOnSquare.type = inputMove[0];
+    squares[8 - newRankNum][newFileNum - 1].pieceOnSquare.isWhite = isWhiteTurn;
+
+
+
 }
 
 
+void updateBoard(const int SIZE, square squaresList[BOARD_WIDTH][BOARD_WIDTH]) {
+    // establishes the order of the pieces and the types of pieces on the squares
+    const int PIECE_ORDER_ROW_1[8]  = { 0, 1, 2, 3, 4, 2, 1, 0 };
+    const char pieceValue[6] = { 'R', 'N', 'B', 'Q', 'K', 'p' };
+    const int reverseRanks[8] = { 8, 7, 6, 5, 4, 3, 2, 1 };
+    // looping horizontally and vertically
+    for (int i = 0; i < BOARD_WIDTH; i++) {
+        for (int j = 0; j < BOARD_WIDTH; j++) {
+            std::cout << "------";
+        }
+        
+        std::cout << "-" << std::endl;
+        for (int j = 0; j < 3; j++) {
+            for (int k = 0; k < BOARD_WIDTH; k++) {
+                squaresList[i][k].printSquare(j);
+            }
+        std::cout << "|" << std::endl;
+        }
+    }
+    for (int i = 0; i < BOARD_WIDTH; i++) {
+            std::cout << "------";
+        }    
+    std::cout << "-" << std::endl;
+}
+
+
+
+bool hasEnded(square squaresList[BOARD_WIDTH][BOARD_WIDTH], bool isWhiteTurn) {
+    /*for (int i = 0; i < BOARD_WIDTH; i++) {
+        for (int j = 0; j < BOARD_WIDTH; j++) {
+            if (squaresList[i][j].pieceOnSquare.type == 'K' && squaresList[i][j].pieceOnSquare.isWhite != isWhiteTurn) {
+                return false;
+            }
+        }
+    }
+    return true; */
+    return false;
+}
 
 
 // Test Comment
