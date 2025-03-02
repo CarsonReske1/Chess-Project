@@ -11,7 +11,8 @@ bool movePieceConditional (square squares[BOARD_WIDTH][BOARD_WIDTH], piece & mov
 void movePiece (square squares[BOARD_WIDTH][BOARD_WIDTH], piece & movingPiece, std::string pos, std::string move);
 int * convertInput(std::string inputPos, std::string inputMove);
 void updateBoard(const int SIZE, square squaresList[BOARD_WIDTH][BOARD_WIDTH]);
-bool hasEnded(square squaresList[BOARD_WIDTH][BOARD_WIDTH], bool isWhiteTurn);
+bool hasEnded(square squaresList[BOARD_WIDTH][BOARD_WIDTH]);
+
 
 int main () {
     
@@ -36,9 +37,11 @@ int main () {
 
     Every turn, we take a validated input in the form [Piece][Rank][File] (Nf3) and move the piece accordingly
     */
-   int count = 0;
 
-   while (hasEnded) {
+   
+   bool stopGame = false;
+
+   while (!stopGame) {
 
     if (isWhiteTurn) {
     std::cout << "It is currently whites's move. Please enter the position of the piece you want to move: ";
@@ -66,18 +69,20 @@ int main () {
         movePiece(squaresList, movingPiece, inputPosition, inputMove);
         //std::cout << "Well done" << std::endl; 
         updateBoard(BOARD_WIDTH, squaresList);
+        stopGame = hasEnded(squaresList);
         isWhiteTurn = !isWhiteTurn;
         //std::cout << "piece is at " << movingPiece.xPos << ", " << movingPiece.yPos;
     }
-    count++;
-   }
+    }
+    if (isWhiteTurn) {
+        std::cout << "Congradulations! Black won the game!\n";
+    } 
+    else {
+        std::cout << "Congradulations! White won the game!\n";
+    }
     
-      
     
-
     return 0;
-
-   
 }
 
 /*int * convertInput(std::string inputPos) {
@@ -320,17 +325,14 @@ void updateBoard(const int SIZE, square squaresList[BOARD_WIDTH][BOARD_WIDTH]) {
 
 
 
-bool hasEnded(square squaresList[BOARD_WIDTH][BOARD_WIDTH], bool isWhiteTurn) {
-    /*for (int i = 0; i < BOARD_WIDTH; i++) {
+bool hasEnded(square squaresList[BOARD_WIDTH][BOARD_WIDTH]) {
+    for (int i = 0; i < BOARD_WIDTH; i++) {
         for (int j = 0; j < BOARD_WIDTH; j++) {
             if (squaresList[i][j].pieceOnSquare.type == 'K' && squaresList[i][j].pieceOnSquare.isWhite != isWhiteTurn) {
                 return false;
             }
         }
     }
-    return true; */
-    return false;
+    return true;
+
 }
-
-
-// Test Comment
