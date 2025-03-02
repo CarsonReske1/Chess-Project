@@ -247,3 +247,8 @@ void movePiece (square (&squares)[BOARD_WIDTH][BOARD_WIDTH], piece & movingPiece
     and update the old square 
     */
 }
+
+
+
+
+// Test Comment
