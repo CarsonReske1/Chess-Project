@@ -239,6 +239,7 @@ bool movePieceConditional (square squares[BOARD_WIDTH][BOARD_WIDTH], piece & mov
     return true;
 
 }
+//test
 
 void movePiece (square (&squares)[BOARD_WIDTH][BOARD_WIDTH], piece & movingPiece, std::string inputPosition, std::string inputMove) {
     /*
